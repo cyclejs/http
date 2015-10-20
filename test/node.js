@@ -7,8 +7,7 @@ require('./common')(uri);
 
 // Node.js specific ============================================================
 var assert = require('assert');
-var Cycle = require('@cycle/core');
-var Rx = require('rx');
+var Rx = require('@reactivex/rxjs');
 var src = require('../lib/index');
 var makeHTTPDriver = src.makeHTTPDriver;
 var globalSandbox = require('./support/global');
@@ -16,7 +15,7 @@ var globalSandbox = require('./support/global');
 describe('HTTP Driver in Node.js', function () {
   it('should auto-execute HTTP request when factory gets eager = true',
     function(done) {
-      var request$ = Rx.Observable.just({
+      var request$ = Rx.Observable.of({
         url: uri + '/pet',
         method: 'POST',
         send: {name: 'Woof', species: 'Dog'}
@@ -35,7 +34,7 @@ describe('HTTP Driver in Node.js', function () {
 
   it('should not auto-execute HTTP request by default',
     function(done) {
-      var request$ = Rx.Observable.just({
+      var request$ = Rx.Observable.of({
         url: uri + '/pet',
         method: 'POST',
         send: {name: 'Woof', species: 'Dog'}
@@ -52,7 +51,7 @@ describe('HTTP Driver in Node.js', function () {
 
   it('should auto-execute HTTP request if the request has eager = true',
     function(done) {
-      var request$ = Rx.Observable.just({
+      var request$ = Rx.Observable.of({
         url: uri + '/pet',
         method: 'POST',
         send: {name: 'Woof', species: 'Dog'},
@@ -72,7 +71,7 @@ describe('HTTP Driver in Node.js', function () {
 
   it('should not auto-execute HTTP request when factory gets eager = false',
     function(done) {
-      var request$ = Rx.Observable.just({
+      var request$ = Rx.Observable.of({
         url: uri + '/pet',
         method: 'POST',
         send: {name: 'Woof', species: 'Dog'}
