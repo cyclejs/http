@@ -108,13 +108,14 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
       .map(reqOptions => {
         let response$ = createResponse$(reqOptions)
         if (eager || reqOptions.eager) {
-          response$ = response$.publishReplay(null, 1)
+          response$ = response$.publishReplay(1)
           response$.connect()
           return response$
         }
         response$.request = reqOptions
         return response$
-      }).shareReplay(null, 1)
+      }).publishReplay(1)
+    response$$.connect()
     return response$$
   }
 }
