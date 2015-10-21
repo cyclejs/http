@@ -23,7 +23,6 @@ function run(uri) {
         response$$.mergeAll().subscribe(
           function onNext() { assert.fail(); },
           function onError(err) {
-            debugger;
             assert.strictEqual(err.message, 'Observable of requests given to ' +
               'HTTP Driver must emit either URL strings or objects with ' +
               'parameters.'
