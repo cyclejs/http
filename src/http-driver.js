@@ -1,4 +1,4 @@
-const Rx = require(`rx`)
+const Rx = require(`@reactivex/rxjs`)
 const superagent = require(`superagent`)
 
 function optionsToSuperagent({
@@ -71,9 +71,14 @@ function createResponse$(reqOptions) {
     if (typeof reqOptions === `string`) {
       request = urlToSuperagent(reqOptions)
     } else if (typeof reqOptions === `object`) {
-      request = optionsToSuperagent(reqOptions)
+      try {
+        request = optionsToSuperagent(reqOptions)
+      } catch (err) {
+        observer.error(err)
+        return () => {} // noop
+      }
     } else {
-      observer.onError(new Error(`Observable of requests given to HTTP ` +
+      observer.error(new Error(`Observable of requests given to HTTP ` +
         `Driver must emit either URL strings or objects with parameters.`))
       return () => {} // noop
     }
@@ -81,14 +86,14 @@ function createResponse$(reqOptions) {
     try {
       request.end((err, res) => {
         if (err) {
-          observer.onError(err)
+          observer.error(err)
         } else {
-          observer.onNext(res)
-          observer.onCompleted()
+          observer.next(res)
+          observer.complete()
         }
       })
     } catch (err) {
-      observer.onError(err)
+      observer.error(err)
     }
 
     return function onDispose() {
@@ -103,13 +108,13 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
       .map(reqOptions => {
         let response$ = createResponse$(reqOptions)
         if (eager || reqOptions.eager) {
-          response$ = response$.replay(null, 1)
+          response$ = response$.publishReplay(1)
           response$.connect()
+          return response$
         }
         response$.request = reqOptions
         return response$
-      })
-      .replay(null, 1)
+      }).publishReplay(1)
     response$$.connect()
     return response$$
   }

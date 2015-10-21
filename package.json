@@ -13,11 +13,10 @@
     "superagent": "1.4.0"
   },
   "peerDependencies": {
-    "@cycle/core": "5.x.x"
+    "@reactivex/rxjs": "5.0.0-alpha.6"
   },
   "devDependencies": {
-    "@cycle/core": "5.0.x",
-    "rx": "4.0.6",
+    "@reactivex/rxjs": "5.0.0-alpha.6",
     "babel": "5.8.23",
     "babelify": "6.3.0",
     "body-parser": "1.14.1",

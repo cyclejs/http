@@ -2,8 +2,7 @@
 /* global describe, it */
 var assert = require('assert');
 var src = require('../lib/index');
-var Cycle = require('@cycle/core');
-var Rx = require('rx');
+var Rx = require('@reactivex/rxjs');
 var makeHTTPDriver = src.makeHTTPDriver;
 
 function run(uri) {
@@ -18,7 +17,7 @@ function run(uri) {
   describe('HTTP Driver', function () {
     it('should throw when request stream emits neither string nor object',
       function(done) {
-        var request$ = Rx.Observable.just(123);
+        var request$ = Rx.Observable.of(123);
         var httpDriver = makeHTTPDriver();
         var response$$ = httpDriver(request$);
         response$$.mergeAll().subscribe(
@@ -36,25 +35,26 @@ function run(uri) {
 
     it('should throw when given options object without url string',
       function(done) {
-        var request$ = Rx.Observable.just({method: 'post'});
+        var request$ = Rx.Observable.of({method: 'post'});
         var httpDriver = makeHTTPDriver();
         var response$$ = httpDriver(request$);
-        response$$.mergeAll().subscribe(
-          function onNext() { assert.fail(); },
-          function onError(err) {
-            assert.strictEqual(
-              err.message, 'Please provide a `url` property in the request ' +
-              'options.'
-            );
-            done();
-          }
-        );
+        response$$.mergeAll()
+          .subscribe(
+            function onNext() { assert.fail(); },
+            function onError(err) {
+              assert.strictEqual(
+                err.message, 'Please provide a `url` property in the request ' +
+                'options.'
+              );
+              done();
+            }
+          );
       }
     );
 
     it('should return response metastream when given a simple URL string',
       function(done) {
-        var request$ = Rx.Observable.just(uri + '/hello');
+        var request$ = Rx.Observable.of(uri + '/hello');
         var httpDriver = makeHTTPDriver();
         var response$$ = httpDriver(request$);
         response$$.subscribe(function(response$) {
@@ -70,7 +70,7 @@ function run(uri) {
 
     it('should return response metastream when given simple options obj',
       function(done) {
-        var request$ = Rx.Observable.just({
+        var request$ = Rx.Observable.of({
           url: uri + '/pet',
           method: 'POST',
           send: {name: 'Woof', species: 'Dog'}
@@ -93,7 +93,7 @@ function run(uri) {
 
     it('should return response metastream when given another options obj',
       function(done) {
-        var request$ = Rx.Observable.just({
+        var request$ = Rx.Observable.of({
           url: uri + '/querystring',
           method: 'GET',
           query: {foo: 102030, bar: 'Pub'}
@@ -117,7 +117,7 @@ function run(uri) {
 
     it('should send 500 server errors to response$ onError',
       function(done) {
-        var request$ = Rx.Observable.just(uri + '/error');
+        var request$ = Rx.Observable.of(uri + '/error');
         var httpDriver = makeHTTPDriver();
         var response$$ = httpDriver(request$);
         response$$.subscribe(function(response$) {
