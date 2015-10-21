@@ -71,7 +71,12 @@ function createResponse$(reqOptions) {
     if (typeof reqOptions === `string`) {
       request = urlToSuperagent(reqOptions)
     } else if (typeof reqOptions === `object`) {
-      request = optionsToSuperagent(reqOptions)
+      try {
+        request = optionsToSuperagent(reqOptions)
+      } catch (err) {
+        observer.error(err)
+        return () => {} // noop
+      }
     } else {
       observer.error(new Error(`Observable of requests given to HTTP ` +
         `Driver must emit either URL strings or objects with parameters.`))
@@ -103,13 +108,12 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
       .map(reqOptions => {
         let response$ = createResponse$(reqOptions)
         if (eager || reqOptions.eager) {
-          response$ = response$.publishReplay(null, 1)
-          response$.connect()
+          response$ = response$.publishReplay(null, 1).connect()
+          return response$
         }
         response$.request = reqOptions
         return response$
-      })
-      .publishReplay(null, 1).refCount()
+      }).shareReplay(null, 1)
     return response$$
   }
 }

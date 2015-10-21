@@ -39,17 +39,17 @@ function run(uri) {
         var request$ = Rx.Observable.of({method: 'post'});
         var httpDriver = makeHTTPDriver();
         var response$$ = httpDriver(request$);
-        response$$.mergeAll().subscribe(
-          function onNext() { assert.fail(); },
-          function onError(err) {
-            assert.strictEqual(
-              err.message, 'Please provide a `url` property in the request ' +
-              'options.'
-            );
-            done();
-          },
-          function complete() { assert.fail(); }
-        );
+        response$$.mergeAll()
+          .subscribe(
+            function onNext() { assert.fail(); },
+            function onError(err) {
+              assert.strictEqual(
+                err.message, 'Please provide a `url` property in the request ' +
+                'options.'
+              );
+              done();
+            }
+          );
       }
     );
 
