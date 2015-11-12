@@ -19,7 +19,7 @@ follow a structure similar to superagent's request API itself.
 `request` object properties:
 
 - `url` *(String)*: the remote resource path. **required**
-- `method` *(String)*: HTTP Method for the request (GET, POST, PUT, etc).
+- `method` *(String)*: HTTP Method for the request (GET, POST, PUT, DEL, etc).
 - `query` *(Object)*: an object with the payload for `GET` or `POST`.
 - `send` *(Object)*: an object with the payload for `POST`.
 - `headers` *(Object)*: object specifying HTTP headers.
@@ -37,6 +37,8 @@ the origin.
   usage of its corresponding response. Default value is `false` (i.e.,
   the request is lazy). Main use case is: set this option to `true` if you
   send POST requests and you are not interested in its response.
+
+Note: Use DEL instead of DELETE to send a delete request.
 
 **Responses**. A metastream is an Observable of Observables. The response
 metastream emits Observables of responses. These Observables of responses
