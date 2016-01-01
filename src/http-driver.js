@@ -123,8 +123,13 @@ function isolateSource(response$$, scope) {
 }
 
 function makeHTTPDriver({eager = false} = {eager: false}) {
-  return function httpDriver(request$) {
+  let replaying = false;
+
+  function httpDriver(request$) {
+    const history = [];
+
     let response$$ = request$
+      .filter(_ => !replaying)
       .map(request => {
         const reqOptions = normalizeRequestOptions(request)
         let response$ = createResponse$(reqOptions)
@@ -139,8 +144,18 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
     response$$.connect()
     response$$.isolateSource = isolateSource
     response$$.isolateSink = isolateSink
+    response$$.history = () => history
     return response$$
   }
+
+  function replayHistory(newHistory) {
+    replaying = false;
+  }
+
+  httpDriver.replayHistory = replayHistory
+  httpDriver.aboutToReplay = () => replaying = true;
+
+  return httpDriver
 }
 
 module.exports = {
