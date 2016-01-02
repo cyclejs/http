@@ -132,8 +132,10 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
     let response$$ = request$
       .map(request => {
         if (replaying) {
-          const historicResponse = history
-            .find(event => event.request === request);
+          const historicResponseIndex = history
+            .findIndex(event => event.request === request);
+
+          const historicResponse = history[historicResponseIndex];
 
           if (typeof historicResponse !== 'undefined') {
             return Rx.Observable.just(historicResponse.response);
