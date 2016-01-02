@@ -124,26 +124,24 @@ function isolateSource(response$$, scope) {
 }
 
 function makeHTTPDriver({eager = false} = {eager: false}) {
-  let replaying = false;
+  let replaying = false
 
-  const history = [];
+  const history = []
 
   function httpDriver(request$) {
     let response$$ = request$
       .map(request => {
         if (replaying) {
-          const historicResponseIndex = history
-            .findIndex(event => event.request === request);
+          const historicResponse = history
+            .filter(event => event.request === request)[0]
 
-          const historicResponse = history[historicResponseIndex];
-
-          if (typeof historicResponse !== 'undefined') {
-            return Rx.Observable.just(historicResponse.response);
+          if (typeof historicResponse !== `undefined`) {
+            return Rx.Observable.just(historicResponse.response)
           }
         }
 
-        function addHistoryEntry (response) {
-          history.push({request, response});
+        function addHistoryEntry(response) {
+          history.push({request, response})
         }
 
         const reqOptions = normalizeRequestOptions(request)
@@ -164,12 +162,12 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
     return response$$
   }
 
-  function replayHistory(newHistory) {
-    replaying = false;
+  function replayHistory() {
+    replaying = false
   }
 
   httpDriver.replayHistory = replayHistory
-  httpDriver.aboutToReplay = () => replaying = true;
+  httpDriver.aboutToReplay = () => replaying = true
 
   return httpDriver
 }
