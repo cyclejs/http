@@ -67,7 +67,7 @@ function urlToSuperagent(url) {
   return superagent.get(url)
 }
 
-function createResponse$(reqOptions) {
+function createResponse$(reqOptions, addHistoryEntry) {
   return Rx.Observable.create(observer => {
     let request = optionsToSuperagent(reqOptions)
 
@@ -76,6 +76,7 @@ function createResponse$(reqOptions) {
         if (err) {
           observer.onError(err)
         } else {
+          addHistoryEntry(res)
           observer.onNext(res)
           observer.onCompleted()
         }
@@ -125,19 +126,32 @@ function isolateSource(response$$, scope) {
 function makeHTTPDriver({eager = false} = {eager: false}) {
   let replaying = false;
 
-  function httpDriver(request$) {
-    const history = [];
+  const history = [];
 
+  function httpDriver(request$) {
     let response$$ = request$
-      .filter(_ => !replaying)
       .map(request => {
+        if (replaying) {
+          const historicResponse = history
+            .find(event => event.request === request);
+
+          if (typeof historicResponse !== 'undefined') {
+            return Rx.Observable.just(historicResponse.response);
+          }
+        }
+
+        function addHistoryEntry (response) {
+          history.push({request, response});
+        }
+
         const reqOptions = normalizeRequestOptions(request)
-        let response$ = createResponse$(reqOptions)
+        let response$ = createResponse$(reqOptions, addHistoryEntry)
         if (eager || reqOptions.eager) {
           response$ = response$.replay(null, 1)
           response$.connect()
         }
         response$.request = reqOptions
+
         return response$
       })
       .replay(null, 1)
