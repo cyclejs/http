@@ -128,19 +128,15 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
   const history = []
 
-  history.stream = new Rx.Subject();
-
-  history.stream.isolateSource = isolateSource
-  history.stream.isolateSink = isolateSink
-  history.stream.history = () => history
+  const responseLog$$ = new Rx.Subject()
 
   function httpDriver(request$) {
-    if (replaying) {
-      return history.stream;
-    }
-
     let response$$ = request$
       .map(request => {
+        if (replaying) {
+          return Rx.Observable.empty()
+        }
+
         function addHistoryEntry(response) {
           history.push({time: new Date(), request, response, stream: new Rx.Subject()})
         }
@@ -155,7 +151,9 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
         return response$
       })
+      .merge(responseLog$$)
       .replay(null, 1)
+
     response$$.connect()
     response$$.isolateSource = isolateSource
     response$$.isolateSink = isolateSink
@@ -169,12 +167,13 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
   httpDriver.replayFinished = () => {
     replaying = false;
+    responseLog$$.onCompleted();
   }
 
   httpDriver.replayHistory = (scheduler, newHistory) => {
     function scheduleEvent(historicEvent) {
       scheduler.scheduleAbsolute({}, historicEvent.time, () => {
-        history.stream.onNext(Rx.Observable.just(historicEvent.response))
+        responseLog$$.onNext(Rx.Observable.just(historicEvent.response))
       })
     }
 
