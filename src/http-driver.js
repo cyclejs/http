@@ -128,20 +128,21 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
   const history = []
 
+  history.stream = new Rx.Subject();
+
+  history.stream.isolateSource = isolateSource
+  history.stream.isolateSink = isolateSink
+  history.stream.history = () => history
+
   function httpDriver(request$) {
+    if (replaying) {
+      return history.stream;
+    }
+
     let response$$ = request$
       .map(request => {
-        if (replaying) {
-          const historicResponse = history
-            .filter(event => event.request === request)[0]
-
-          if (typeof historicResponse !== `undefined`) {
-            return Rx.Observable.just(historicResponse.response)
-          }
-        }
-
         function addHistoryEntry(response) {
-          history.push({request, response})
+          history.push({time: new Date(), request, response, stream: new Rx.Subject()})
         }
 
         const reqOptions = normalizeRequestOptions(request)
@@ -162,8 +163,24 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
     return response$$
   }
 
-  httpDriver.aboutToReplay = () => replaying = true
-  httpDriver.replayFinished = () => replaying = false
+  httpDriver.aboutToReplay = () => {
+    replaying = true;
+  }
+
+  httpDriver.replayFinished = () => {
+    replaying = false;
+  }
+
+  httpDriver.replayHistory = (scheduler, newHistory) => {
+    function scheduleEvent(historicEvent) {
+      scheduler.scheduleAbsolute({}, historicEvent.time, () => {
+        history.stream.onNext(Rx.Observable.just(historicEvent.response))
+      })
+    }
+
+
+    newHistory.forEach(scheduleEvent)
+  }
 
   return httpDriver
 }
