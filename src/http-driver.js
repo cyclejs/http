@@ -132,16 +132,14 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
   function httpDriver(request$) {
     let response$$ = request$
+      .filter(() => !replaying)
       .map(request => {
-        if (replaying) {
-          return Rx.Observable.empty()
-        }
+        const reqOptions = normalizeRequestOptions(request)
 
         function addHistoryEntry(response) {
-          history.push({time: new Date(), request, response, stream: new Rx.Subject()})
+          history.push({time: new Date(), request, reqOptions, response, stream: responseLog$$})
         }
 
-        const reqOptions = normalizeRequestOptions(request)
         let response$ = createResponse$(reqOptions, addHistoryEntry)
         if (eager || reqOptions.eager) {
           response$ = response$.replay(null, 1)
@@ -167,13 +165,16 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
 
   httpDriver.replayFinished = () => {
     replaying = false
-    responseLog$$.onCompleted()
   }
 
   httpDriver.replayHistory = (scheduler, newHistory) => {
     function scheduleEvent(historicEvent) {
       scheduler.scheduleAbsolute({}, historicEvent.time, () => {
-        responseLog$$.onNext(Rx.Observable.just(historicEvent.response))
+        const response$ = Rx.Observable.just(historicEvent.response)
+
+        response$.request = historicEvent.reqOptions
+
+        responseLog$$.onNext(response$)
       })
     }
 
