@@ -162,12 +162,12 @@ function makeHTTPDriver({eager = false} = {eager: false}) {
   }
 
   httpDriver.aboutToReplay = () => {
-    replaying = true;
+    replaying = true
   }
 
   httpDriver.replayFinished = () => {
-    replaying = false;
-    responseLog$$.onCompleted();
+    replaying = false
+    responseLog$$.onCompleted()
   }
 
   httpDriver.replayHistory = (scheduler, newHistory) => {
