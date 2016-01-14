@@ -67,7 +67,7 @@ function urlToSuperagent(url) {
   return superagent.get(url)
 }
 
-function createResponse$(reqOptions) {
+function createResponse$(reqOptions, addHistoryEntry) {
   return Rx.Observable.create(observer => {
     let request = optionsToSuperagent(reqOptions)
 
@@ -76,6 +76,7 @@ function createResponse$(reqOptions) {
         if (err) {
           observer.onError(err)
         } else {
+          addHistoryEntry(res)
           observer.onNext(res)
           observer.onCompleted()
         }
@@ -123,24 +124,65 @@ function isolateSource(response$$, scope) {
 }
 
 function makeHTTPDriver({eager = false} = {eager: false}) {
-  return function httpDriver(request$) {
+  let replaying = false
+
+  const history = []
+
+  const responseLog$$ = new Rx.Subject()
+
+  function httpDriver(request$) {
     let response$$ = request$
+      .filter(() => !replaying)
       .map(request => {
         const reqOptions = normalizeRequestOptions(request)
-        let response$ = createResponse$(reqOptions)
+
+        function addHistoryEntry(response) {
+          history.push({time: new Date(), request, reqOptions, response, stream: responseLog$$})
+        }
+
+        let response$ = createResponse$(reqOptions, addHistoryEntry)
         if (eager || reqOptions.eager) {
           response$ = response$.replay(null, 1)
           response$.connect()
         }
         response$.request = reqOptions
+
         return response$
       })
+      .merge(responseLog$$)
       .replay(null, 1)
+
     response$$.connect()
     response$$.isolateSource = isolateSource
     response$$.isolateSink = isolateSink
+    response$$.history = () => history
     return response$$
   }
+
+  httpDriver.aboutToReplay = () => {
+    replaying = true
+  }
+
+  httpDriver.replayFinished = () => {
+    replaying = false
+  }
+
+  httpDriver.replayHistory = (scheduler, newHistory) => {
+    function scheduleEvent(historicEvent) {
+      scheduler.scheduleAbsolute({}, historicEvent.time, () => {
+        const response$ = Rx.Observable.just(historicEvent.response)
+
+        response$.request = historicEvent.reqOptions
+
+        responseLog$$.onNext(response$)
+      })
+    }
+
+
+    newHistory.forEach(scheduleEvent)
+  }
+
+  return httpDriver
 }
 
 module.exports = {
