@@ -85,4 +85,62 @@ describe('HTTP Driver in Node.js', function () {
       }, 100);
     }
   );
+
+  it('should prepend prefix to all http requests',
+    function(done) {
+      var request$ = Rx.Observable.just({
+        url: '/pet',
+        method: 'POST',
+        send: {name: 'Woof', species: 'Dog'}
+      });
+      var httpDriver = makeHTTPDriver({eager: true, prefix: uri});
+      globalSandbox.petPOSTResponse = null;
+      httpDriver(request$);
+      setTimeout(function () {
+        assert.notStrictEqual(globalSandbox.petPOSTResponse, null);
+        assert.strictEqual(globalSandbox.petPOSTResponse, 'added Woof the Dog');
+        globalSandbox.petPOSTResponse = null;
+        done();
+      }, 100);
+    }
+  );
+
+  it('should override driver prefix with request.prefix',
+    function(done) {
+      var request$ = Rx.Observable.just({
+        prefix: uri,
+        url: '/pet',
+        method: 'POST',
+        send: {name: 'Woof', species: 'Dog'}
+      });
+      var httpDriver = makeHTTPDriver({eager: true, prefix: 'dummy'});
+      globalSandbox.petPOSTResponse = null;
+      httpDriver(request$);
+      setTimeout(function () {
+        assert.notStrictEqual(globalSandbox.petPOSTResponse, null);
+        assert.strictEqual(globalSandbox.petPOSTResponse, 'added Woof the Dog');
+        globalSandbox.petPOSTResponse = null;
+        done();
+      }, 100);
+    }
+  );
+
+  it('should not use prefix if request.url contains protocol',
+    function(done) {
+      var request$ = Rx.Observable.just({
+        url: uri + '/pet',
+        method: 'POST',
+        send: {name: 'Woof', species: 'Dog'}
+      });
+      var httpDriver = makeHTTPDriver({eager: true, prefix: 'dummy'});
+      globalSandbox.petPOSTResponse = null;
+      httpDriver(request$);
+      setTimeout(function () {
+        assert.notStrictEqual(globalSandbox.petPOSTResponse, null);
+        assert.strictEqual(globalSandbox.petPOSTResponse, 'added Woof the Dog');
+        globalSandbox.petPOSTResponse = null;
+        done();
+      }, 100);
+    }
+  );
 });

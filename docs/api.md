@@ -51,7 +51,8 @@ received through superagent.
 options are:
 - `eager` *(Boolean)*: execute the HTTP eagerly, even if its
   response Observable is not subscribed to. Default: **false**.
-
+- `prefix` *(String)*: prepends url of each request with prefix, 
+  can be overridden by request specific option. Default: **""**.
 #### Return:
 
 *(Function)* the HTTP Driver function
