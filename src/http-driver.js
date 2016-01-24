@@ -3,6 +3,7 @@ const superagent = require(`superagent`)
 
 function optionsToSuperagent({
   url,
+  prefix = ``,
   send = null,
   accept = null,
   query = null,
@@ -19,10 +20,14 @@ function optionsToSuperagent({
   if (typeof url !== `string`) {
     throw new Error(`Please provide a \`url\` property in the request options.`)
   }
+
+  let requestUrl = prefix && !/^https?:\/\//.test(url) ?
+    prefix + url : url
+
   const lowerCaseMethod = method.toLowerCase()
   const sanitizedMethod = lowerCaseMethod === `delete` ? `del` : lowerCaseMethod
 
-  let request = superagent[sanitizedMethod](url)
+  let request = superagent[sanitizedMethod](requestUrl)
   if (typeof request.redirects === `function`) {
     request = request.redirects(redirects)
   }
@@ -67,9 +72,9 @@ function urlToSuperagent(url) {
   return superagent.get(url)
 }
 
-function createResponse$(reqOptions) {
+function createResponse$(reqOptions, options) {
   return Rx.Observable.create(observer => {
-    let request = optionsToSuperagent(reqOptions)
+    let request = optionsToSuperagent(reqOptions, options)
 
     try {
       request.end((err, res) => {
@@ -122,11 +127,18 @@ function isolateSource(response$$, scope) {
   return isolatedResponse$$
 }
 
-function makeHTTPDriver({eager = false} = {eager: false}) {
+function makeHTTPDriver(
+  {eager = false, prefix = ``} = {eager: false, prefix: ``}
+) {
   return function httpDriver(request$) {
     let response$$ = request$
       .map(request => {
         const reqOptions = normalizeRequestOptions(request)
+
+        if (typeof reqOptions.prefix === `undefined`) {
+          reqOptions.prefix = prefix
+        }
+
         let response$ = createResponse$(reqOptions)
         if (eager || reqOptions.eager) {
           response$ = response$.replay(null, 1)
