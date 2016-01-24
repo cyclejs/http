@@ -16,6 +16,7 @@ let CycleHTTPDriver = {
    * `request` object properties:
    *
    * - `url` *(String)*: the remote resource path. **required**
+   * - `prefix` *(String)*: prepends url with given value, overrides driver option.
    * - `method` *(String)*: HTTP Method for the request (GET, POST, PUT, etc).
    * - `query` *(Object)*: an object with the payload for `GET` or `POST`.
    * - `send` *(Object)*: an object with the payload for `POST`.
@@ -47,6 +48,8 @@ let CycleHTTPDriver = {
    * options are:
    * - `eager` *(Boolean)*: execute the HTTP eagerly, even if its
    *   response Observable is not subscribed to. Default: **false**.
+   * - `prefix` *(String)*: prepends url of each request with prefix,
+   *   can be overridden by request specific option. Default: **""**.
    * @return {Function} the HTTP Driver function
    * @function makeHTTPDriver
    */

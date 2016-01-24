@@ -72,9 +72,9 @@ function urlToSuperagent(url) {
   return superagent.get(url)
 }
 
-function createResponse$(reqOptions, options) {
+function createResponse$(reqOptions) {
   return Rx.Observable.create(observer => {
-    let request = optionsToSuperagent(reqOptions, options)
+    let request = optionsToSuperagent(reqOptions)
 
     try {
       request.end((err, res) => {
