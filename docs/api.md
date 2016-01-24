@@ -19,6 +19,7 @@ follow a structure similar to superagent's request API itself.
 `request` object properties:
 
 - `url` *(String)*: the remote resource path. **required**
+- `prefix` *(String)*: prepends url with value, overrides driver option.
 - `method` *(String)*: HTTP Method for the request (GET, POST, PUT, etc).
 - `query` *(Object)*: an object with the payload for `GET` or `POST`.
 - `send` *(Object)*: an object with the payload for `POST`.
