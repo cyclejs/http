@@ -50,7 +50,7 @@
     "test": "npm run eslint && npm run test-node && npm run test-browser",
     "browserify": "browserify src/index.js -t babelify -t browserify-shim --standalone CycleHTTPDriver --exclude rx --outfile dist/cycle-http-driver.js",
     "uglify": "uglifyjs dist/cycle-http-driver.js -o dist/cycle-http-driver.min.js",
-    "precompile-lib": "rm -rf lib/ && mkdir -p lib",
+    "precompile-lib": "rm -rf lib/ && mkdir lib",
     "compile-lib": "babel -d lib/ src/",
     "dist": "npm run browserify && npm run uglify",
     "docs": "node ./scripts/make-api-docs.js",
