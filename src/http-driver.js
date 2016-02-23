@@ -32,7 +32,7 @@ function optionsToSuperagent({
   }
   if (responseType) {
     request = request.reponseType(responseType)
-  }  
+  }
   if (send !== null) {
     request = request.send(send)
   }
