@@ -31,7 +31,7 @@ function optionsToSuperagent({
     request = request.type(type)
   }
   if (responseType) {
-    request = request.reponseType(responseType)
+    request = request.responseType(responseType)
   }
   if (send !== null) {
     request = request.send(send)
