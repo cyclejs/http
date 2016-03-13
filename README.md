@@ -57,7 +57,7 @@ function main(responses) {
 
 ### Request and response cycle
 
-The request and response are linked. If you create a request without a corresponding response, by default the request will not be sent. If you want to send the request without listening for a response, you must specify `eager: true` for your request object:
+By default, request are 'lazy', i.e. they will not be sent until their response stream gets subscribed to. If you want to send the request without listening for a response, you must specify `eager: true` for your request object:
 
 ```
 return {
