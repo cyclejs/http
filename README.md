@@ -55,6 +55,22 @@ function main(responses) {
 }
 ```
 
+### Request and response cycle
+
+By default, request are 'lazy', i.e. they will not be sent until their response stream gets subscribed to. If you want to send the request without listening for a response, you must specify `eager: true` for your request object:
+
+```
+return {
+  url: HELLO_URL,
+  method: 'POST',
+  eager: true
+};
+```
+
+Main use case is: set this option to `true` if you send POST requests and you are not interested in its response.
+
+## A thorough guide
+
 A thorough guide to the Observable API inside `main`:
 
 ```js
