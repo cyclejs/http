@@ -30,7 +30,7 @@ function optionsToSuperagent({
   if (type) {
     request = request.type(type)
   }
-  if (responseType) {
+  if (responseType && typeof request.responseType === 'function') {
     request = request.responseType(responseType)
   }
   if (send !== null) {
