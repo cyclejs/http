@@ -8,6 +8,10 @@ npm install @cycle/http
 
 [![npm version](https://badge.fury.io/js/%40cycle%2Fhttp.svg)](http://badge.fury.io/js/%40cycle%2Fhttp)
 
+## Why are Issues unavailable?
+
+We use only one repository for issues. [**Open the issue at Cycle Core repo.**](https://github.com/cyclejs/cycle-core/issues)
+
 ## Usage
 
 Basics:
@@ -95,6 +99,23 @@ function main(responses) {
 }
 ```
 
+## Error handling
+
+You can handle errors using standard RxJS operators. The response stream is a stream of streams, i.e. each response will be its own stream so usually you want to catch errors for that single response stream:
+
+```
+responses.HTTP
+  .filter(res$ => res$.request.url === HELLO_URL)
+  .flatMap((response$) =>
+    response$
+      .map((response) => console.log(response))
+      .catch(O.just(errorObject)) 
+  )
+```
+For more information, refer to the [RxJS documention for catch](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/catch.md).
+
+## More information
+
 For a more advanced usage, check the [Search example](https://github.com/cyclejs/cycle-examples/tree/master/http-search-github) and the [documentation](https://github.com/cyclejs/cycle-http-driver/blob/master/docs/api.md).
 
 ## Browser support
@@ -105,6 +126,6 @@ IE 8 is not supported because this library depends on [superagent](https://githu
 
 - - -
 
-[![Build Status](https://travis-ci.org/cyclejs/cycle-http-driver.svg?branch=master)](https://travis-ci.org/cyclejs/cycle-http-driver)
-[![Dependency Status](https://david-dm.org/cyclejs/cycle-http-driver.svg)](https://david-dm.org/cyclejs/cycle-http-driver)
-[![devDependency Status](https://david-dm.org/cyclejs/cycle-http-driver/dev-status.svg)](https://david-dm.org/cyclejs/cycle-http-driver#info=devDependencies)
+[![Build Status](https://travis-ci.org/cyclejs/http.svg?branch=master)](https://travis-ci.org/cyclejs/http)
+[![Dependency Status](https://david-dm.org/cyclejs/http.svg)](https://david-dm.org/cyclejs/http)
+[![devDependency Status](https://david-dm.org/cyclejs/http/dev-status.svg)](https://david-dm.org/cyclejs/http#info=devDependencies)
