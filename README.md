@@ -81,7 +81,7 @@ and filtered:
 ```
 function main(responses) {
   var response$ = responses.HTTP
-    .filter(res$ => res$.request.anyOtherDataYouWish === 'foobar-whatever-name-I-want')
+    .filter(res$ => res$.request.anyOtherDataYouWish === 'asd')
     .mergeAll();
 ```
 A thorough guide to the Observable API inside `main`:
