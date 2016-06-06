@@ -54,7 +54,7 @@ function main(responses) {
   };
 }
 ```
-You can also add a name the request :
+You can also add a name to the request :
 ```
 var request$ = Rx.Observable.just({
   url: 'www.google.com',
