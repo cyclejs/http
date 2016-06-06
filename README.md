@@ -54,7 +54,36 @@ function main(responses) {
   };
 }
 ```
-
+You can also add a name the request :
+```
+var request$ = Rx.Observable.just({
+  url: 'www.google.com',
+  method: 'get',
+  name: 'foobar-whatever-name-I-want',
+});
+```
+and use it to filter the response:
+```
+function main(responses) {
+  var response$ = responses.HTTP
+    .filter(res$ => res$.request.name === 'foobar-whatever-name-I-want')
+    .mergeAll();
+```
+Custom properties can also be used :
+```
+var request$ = Rx.Observable.just({
+  url: 'www.google.com',
+  method: 'get',
+  anyOtherDataYouWish: 'asd'
+});
+```
+and filtered:
+```
+function main(responses) {
+  var response$ = responses.HTTP
+    .filter(res$ => res$.request.anyOtherDataYouWish === 'foobar-whatever-name-I-want')
+    .mergeAll();
+```
 A thorough guide to the Observable API inside `main`:
 
 ```js
