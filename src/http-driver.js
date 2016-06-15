@@ -13,6 +13,7 @@ function optionsToSuperagent({
   withCredentials = false,
   headers = {},
   redirects = 5,
+  responseType = null,
   type = `json`,
   method = `get`,
 }) {
@@ -26,7 +27,12 @@ function optionsToSuperagent({
   if (typeof request.redirects === `function`) {
     request = request.redirects(redirects)
   }
-  request = request.type(type)
+  if (type) {
+    request = request.type(type)
+  }
+  if (responseType && typeof request.responseType === 'function') {
+    request = request.responseType(responseType)
+  }
   if (send !== null) {
     request = request.send(send)
   }
